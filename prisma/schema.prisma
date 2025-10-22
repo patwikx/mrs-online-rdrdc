@@ -1,0 +1,1099 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// User model (extends NextAuth)
+model User {
+  id            String    @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String    @unique
+  password      String
+  contactNo     String?
+  role          UserRole  @default(ADMIN)
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  createdProperties   Property[]           @relation("CreatedBy")
+  assignedMaintenance MaintenanceRequest[] @relation("AssignedTo")
+  uploadedDocuments   Document[]           @relation("UploadedBy")
+  tenant              Tenant?
+  updatedPDCs         PDC[]                @relation("UpdatedBy")
+
+  // Project Management Relations
+  ownedProjects    Project[]               @relation("ProjectOwner")
+  memberOfProjects ProjectMember[]
+  assignedTasks    Task[]                  @relation("AssignedTasks")
+  createdTasks     Task[]                  @relation("CreatedTasks")
+  taskComments     TaskComment[]
+  taskAttachments  TaskAttachment[]
+  taskActivities   TaskActivity[]
+  titleMovements   PropertyTitleMovement[]
+
+  // System Relations
+  auditLogs     AuditLog[]
+  notifications Notification[]
+
+  // Notice Relations
+  createdNotices TenantNotice[] @relation("CreatedNotices")
+  TenantNotice   TenantNotice[]
+
+  // MRS Relations
+  createdMRSRequests  MaterialRequest[]    @relation("MRSRequestCreator")
+  approverAssignments DepartmentApprover[]
+  recMRSApprovals     MaterialRequest[]    @relation("MRSRecApprover")
+  finalMRSApprovals   MaterialRequest[]    @relation("MRSFinalApprover")
+  mrsUserDepartment   Department?          @relation("DepartmentUsers", fields: [mrsDepartmentId], references: [id])
+  mrsDepartmentId     String?
+
+  @@index([mrsDepartmentId])
+}
+
+model PDC {
+  id          String    @id @default(cuid())
+  docDate     DateTime  @default(now())
+  refNo       String
+  bankName    String
+  dueDate     DateTime
+  checkNo     String
+  amount      Float
+  remarks     String?
+  bpCode      String
+  bpName      String
+  updatedById String
+  status      PDCStatus @default(Open)
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  tenant    Tenant @relation(fields: [bpCode], references: [bpCode])
+  updatedBy User   @relation("UpdatedBy", fields: [updatedById], references: [id])
+
+  @@index([bpCode])
+  @@index([updatedById])
+}
+
+// NextAuth required models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ==========================================
+// MRS (Material Request System) Models
+// ==========================================
+
+// Business Units for MRS
+model BusinessUnit {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  departments Department[]
+  requests    MaterialRequest[]
+
+  @@map("business_units")
+}
+
+// Departments for MRS
+model Department {
+  id             String       @id @default(cuid())
+  code           String       @unique
+  name           String
+  description    String?
+  businessUnitId String
+  businessUnit   BusinessUnit @relation(fields: [businessUnitId], references: [id], onDelete: Cascade)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  users     User[]               @relation("DepartmentUsers")
+  requests  MaterialRequest[]
+  approvers DepartmentApprover[]
+
+  @@map("departments")
+}
+
+// Department Approvers (for assigning approvers per department)
+model DepartmentApprover {
+  id           String       @id @default(cuid())
+  departmentId String
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department   Department   @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  approverType ApproverType
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@unique([departmentId, userId, approverType])
+  @@map("department_approvers")
+}
+
+// Material Request
+model MaterialRequest {
+  id     String        @id @default(cuid())
+  docNo  String        @unique // e.g., PO-16529
+  series String // e.g., PO
+  type   RequestType // Item or Service
+  status RequestStatus @default(DRAFT)
+
+  // Dates
+  datePrepared DateTime
+  dateRequired DateTime
+  dateReceived DateTime?
+  dateApproved DateTime?
+  datePosted   DateTime?
+  dateRevised  DateTime?
+
+  // Business Unit & Department
+  businessUnitId String
+  businessUnit   BusinessUnit @relation(fields: [businessUnitId], references: [id])
+  departmentId   String?
+  department     Department?  @relation(fields: [departmentId], references: [id])
+
+  // Charge To
+  chargeTo String?
+
+  // Purpose & Details
+  purpose   String?
+  remarks   String?
+  deliverTo String?
+  freight   Decimal @default(0) @db.Decimal(10, 2)
+  discount  Decimal @default(0) @db.Decimal(10, 2)
+  total     Decimal @default(0) @db.Decimal(10, 2)
+
+  // Confirmation
+  confirmationNo String?
+
+  // Supplier Information (Optional)
+  supplierBPCode      String?
+  supplierName        String?
+  purchaseOrderNumber String?
+
+  // Request Creator
+  requestedById String
+  requestedBy   User   @relation("MRSRequestCreator", fields: [requestedById], references: [id])
+
+  // Approvals
+  recApproverId     String?
+  recApprover       User?           @relation("MRSRecApprover", fields: [recApproverId], references: [id])
+  recApprovalDate   DateTime?
+  recApprovalStatus ApprovalStatus?
+
+  finalApproverId     String?
+  finalApprover       User?           @relation("MRSFinalApprover", fields: [finalApproverId], references: [id])
+  finalApprovalDate   DateTime?
+  finalApprovalStatus ApprovalStatus?
+
+  // Relations
+  items MaterialRequestItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessUnitId])
+  @@index([departmentId])
+  @@index([status])
+  @@index([series])
+  @@index([datePrepared])
+  @@map("material_requests")
+}
+
+// Material Request Items
+model MaterialRequestItem {
+  id                String          @id @default(cuid())
+  materialRequestId String
+  materialRequest   MaterialRequest @relation(fields: [materialRequestId], references: [id], onDelete: Cascade)
+
+  itemCode    String?
+  description String
+  uom         String // Unit of Measurement
+  quantity    Decimal  @db.Decimal(10, 2)
+  unitPrice   Decimal? @db.Decimal(10, 2)
+  totalPrice  Decimal? @db.Decimal(10, 2)
+
+  remarks String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("material_request_items")
+}
+
+// ==========================================
+// End of MRS Models
+// ==========================================
+
+// Project Management Models
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  ownerId     String
+  status      ProjectStatus @default(ACTIVE)
+  startDate   DateTime
+  endDate     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  owner   User            @relation("ProjectOwner", fields: [ownerId], references: [id])
+  members ProjectMember[]
+  boards  Board[]
+  tasks   Task[]
+}
+
+model ProjectMember {
+  id        String      @id @default(cuid())
+  projectId String
+  userId    String
+  role      ProjectRole @default(PURCHASER)
+  joinedAt  DateTime    @default(now())
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([projectId, userId])
+}
+
+model Board {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  columns Column[]
+}
+
+model Column {
+  id        String   @id @default(cuid())
+  boardId   String
+  name      String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks Task[]
+}
+
+model Task {
+  id           String       @id @default(cuid())
+  projectId    String
+  columnId     String
+  title        String
+  description  String?
+  priority     TaskPriority @default(MEDIUM)
+  status       TaskStatus   @default(TODO)
+  dueDate      DateTime?
+  order        Int
+  createdById  String
+  assignedToId String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Relations
+  project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  column      Column           @relation(fields: [columnId], references: [id])
+  createdBy   User             @relation("CreatedTasks", fields: [createdById], references: [id])
+  assignedTo  User?            @relation("AssignedTasks", fields: [assignedToId], references: [id])
+  comments    TaskComment[]
+  attachments TaskAttachment[]
+  activities  TaskActivity[]
+  labels      TaskLabel[]
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+}
+
+model TaskAttachment {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  name      String
+  fileUrl   String
+  fileType  String
+  fileSize  Int
+  createdAt DateTime @default(now())
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+}
+
+model TaskActivity {
+  id        String       @id @default(cuid())
+  taskId    String
+  userId    String
+  type      ActivityType
+  content   String
+  metadata  Json?
+  createdAt DateTime     @default(now())
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+}
+
+model TaskLabel {
+  id        String   @id @default(cuid())
+  taskId    String
+  name      String
+  color     String
+  createdAt DateTime @default(now())
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+// Property Management Models
+model Property {
+  id           String       @id @default(cuid())
+  propertyCode String       @unique
+  propertyName String
+  leasableArea Float
+  address      String
+  propertyType PropertyType
+  totalUnits   Int?         @default(0)
+  createdById  String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Relations
+  createdBy      User                    @relation("CreatedBy", fields: [createdById], references: [id])
+  units          Unit[]
+  documents      Document[]
+  utilities      PropertyUtility[]
+  titleMovements PropertyTitleMovement[]
+  titles         PropertyTitles[]
+}
+
+model PropertyTitles {
+  id                 String   @id @default(cuid())
+  propertyId         String
+  titleNo            String   @unique
+  lotNo              String
+  lotArea            Float
+  registeredOwner    String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  isEncumbered       Boolean  @default(false)
+  encumbranceDetails String?
+
+  // RELATIONS
+  property      Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyTaxes PropertyTax[]
+  units         Unit[]
+
+  @@index([propertyId])
+}
+
+model PropertyTitleMovement {
+  id          String              @id @default(cuid())
+  propertyId  String
+  requestedBy String
+  status      TitleMovementStatus
+  location    String
+  purpose     String
+  remarks     String?
+  requestDate DateTime            @default(now())
+  returnDate  DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  // Relations
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [requestedBy], references: [id])
+
+  @@index([propertyId])
+  @@index([requestedBy])
+}
+
+model PropertyTax {
+  id              String    @id @default(cuid())
+  propertyTitleId String
+  taxYear         Int
+  TaxDecNo        String
+  taxAmount       Float
+  dueDate         DateTime
+  isPaid          Boolean   @default(false)
+  remarks         String?
+  isAnnual        Boolean   @default(false)
+  isQuarterly     Boolean   @default(false)
+  whatQuarter     String?
+  paidDate        DateTime?
+  processedBy     String?
+  markedAsPaidBy  String?
+  paidRemarks     String?
+  fileUrl         String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  propertyTitle PropertyTitles @relation(fields: [propertyTitleId], references: [id], onDelete: Cascade)
+}
+
+model Unit {
+  id              String     @id @default(cuid())
+  propertyId      String
+  propertyTitleId String?
+  unitNumber      String
+  totalArea       Float
+  totalRent       Float
+  status          UnitStatus
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // Relations
+  property            Property             @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyTitle       PropertyTitles?      @relation(fields: [propertyTitleId], references: [id], onDelete: SetNull)
+  unitFloors          UnitFloor[]
+  leaseUnits          LeaseUnit[]          @relation("UnitLeases")
+  maintenanceRequests MaintenanceRequest[]
+  documents           Document[]
+  unitTaxes           UnitTax[]
+  utilityAccounts     UnitUtilityAccount[]
+
+  @@unique([propertyId, unitNumber])
+  @@index([propertyTitleId])
+}
+
+model UnitFloor {
+  id        String    @id @default(cuid())
+  unitId    String
+  floorType FloorType
+  area      Float
+  rate      Float
+  rent      Float
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, floorType])
+  @@index([unitId])
+}
+
+model UnitTax {
+  id             String    @id @default(cuid())
+  unitId         String
+  taxYear        Int
+  taxDecNo       String
+  taxAmount      Float
+  isAnnual       Boolean   @default(false)
+  isQuarterly    Boolean   @default(false)
+  whatQuarter    String?
+  remarks        String?
+  processedBy    String?
+  markedAsPaidBy String?
+  paidRemarks    String?
+  fileUrl        String?
+  dueDate        DateTime
+  isPaid         Boolean   @default(false)
+  paidDate       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+}
+
+model PropertyUtility {
+  id            String      @id @default(cuid())
+  propertyId    String
+  utilityType   UtilityType
+  provider      String
+  accountNumber String
+  meterNumber   String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  isActive      Boolean     @default(false)
+
+  // Relations
+  property Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  bills    UtilityBill[]
+}
+
+model UnitUtilityAccount {
+  id            String      @id @default(cuid())
+  unitId        String
+  utilityType   UtilityType
+  accountNumber String
+  meterNumber   String?
+  remarks       String?
+  billingId     String?
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  unit  Unit          @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  bills UtilityBill[]
+}
+
+model UtilityBill {
+  id                   String    @id @default(cuid())
+  propertyUtilityId    String?
+  unitUtilityAccountId String?
+  billingPeriodStart   DateTime
+  billingPeriodEnd     DateTime
+  dueDate              DateTime
+  amount               Float
+  consumption          Float?
+  isPaid               Boolean   @default(false)
+  paidDate             DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // Relations
+  propertyUtility    PropertyUtility?    @relation(fields: [propertyUtilityId], references: [id])
+  unitUtilityAccount UnitUtilityAccount? @relation(fields: [unitUtilityAccountId], references: [id])
+}
+
+model Tenant {
+  id                    String       @id @default(cuid())
+  userId                String?      @unique
+  bpCode                String       @unique
+  firstName             String?
+  lastName              String?
+  email                 String
+  phone                 String
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  company               String
+  businessName          String
+  status                TenantStatus
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  createdById           String?
+
+  // Relations
+  user                User?                @relation(fields: [userId], references: [id])
+  leases              Lease[]              @relation("TenantLeases")
+  maintenanceRequests MaintenanceRequest[]
+  documents           Document[]
+  pdcs                PDC[]
+  notices             TenantNotice[]
+}
+
+model Lease {
+  id                String      @id @default(cuid())
+  tenantId          String
+  startDate         DateTime
+  endDate           DateTime
+  totalRentAmount   Float
+  securityDeposit   Float
+  status            LeaseStatus @default(PENDING)
+  terminationDate   DateTime?
+  terminationReason String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Relations
+  tenant     Tenant      @relation("TenantLeases", fields: [tenantId], references: [id])
+  leaseUnits LeaseUnit[] @relation("LeaseUnits")
+  payments   Payment[]
+}
+
+model LeaseUnit {
+  id         String   @id @default(cuid())
+  leaseId    String
+  unitId     String
+  rentAmount Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  lease Lease @relation("LeaseUnits", fields: [leaseId], references: [id], onDelete: Cascade)
+  unit  Unit  @relation("UnitLeases", fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([leaseId, unitId])
+  @@index([leaseId])
+  @@index([unitId])
+}
+
+model MaintenanceRequest {
+  id           String              @id @default(cuid())
+  unitId       String
+  tenantId     String
+  category     MaintenanceCategory
+  priority     Priority
+  description  String
+  status       MaintenanceStatus
+  assignedToId String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  completedAt  DateTime?
+
+  // Relations
+  unit       Unit   @relation(fields: [unitId], references: [id])
+  tenant     Tenant @relation(fields: [tenantId], references: [id])
+  assignedTo User?  @relation("AssignedTo", fields: [assignedToId], references: [id])
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  leaseId       String
+  amount        Float
+  paymentType   PaymentType
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus
+  paymentDate   DateTime
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  lease Lease @relation(fields: [leaseId], references: [id])
+}
+
+model Document {
+  id           String       @id @default(cuid())
+  name         String
+  description  String?
+  documentType DocumentType
+  fileUrl      String
+  propertyId   String?
+  unitId       String?
+  tenantId     String?
+  uploadedById String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Relations
+  property   Property? @relation(fields: [propertyId], references: [id])
+  unit       Unit?     @relation(fields: [unitId], references: [id])
+  tenant     Tenant?   @relation(fields: [tenantId], references: [id])
+  uploadedBy User      @relation("UploadedBy", fields: [uploadedById], references: [id])
+}
+
+// Audit Log System
+model AuditLog {
+  id         String      @id @default(cuid())
+  entityId   String
+  entityType EntityType
+  action     AuditAction
+  userId     String
+  changes    Json?
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json?
+  createdAt  DateTime    @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+}
+
+// Notification System
+model Notification {
+  id         String               @id @default(cuid())
+  userId     String
+  title      String
+  message    String
+  type       NotificationType
+  priority   NotificationPriority
+  isRead     Boolean              @default(false)
+  readAt     DateTime?
+  actionUrl  String?
+  entityId   String?
+  entityType EntityType?
+  createdAt  DateTime             @default(now())
+  expiresAt  DateTime?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+}
+
+// Tenant Notice Models
+model TenantNotice {
+  id           String     @id @default(cuid())
+  tenantId     String
+  noticeType   NoticeType
+  noticeNumber Int
+  totalAmount  Float      @default(0)
+  forMonth     String
+  forYear      Int
+  dateIssued   DateTime   @default(now())
+
+  primarySignatory String @default("DARYLL JOY ENRIQUEZ")
+  primaryTitle     String @default("Credit and Collection Officer")
+  primaryContact   String @default("+63998 585 0879")
+
+  secondarySignatory String @default("C.A.B. LAGUINDAM")
+  secondaryTitle     String @default("AVP-Finance/Controller")
+
+  isSettled   Boolean   @default(false)
+  settledDate DateTime?
+  settledBy   String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String
+
+  // Relations
+  tenant    Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy User         @relation("CreatedNotices", fields: [createdById], references: [id])
+  items     NoticeItem[]
+  User      User?        @relation(fields: [userId], references: [id])
+  userId    String?
+
+  @@index([tenantId])
+  @@index([createdById])
+}
+
+model NoticeItem {
+  id           String       @id @default(cuid())
+  noticeId     String
+  description  String
+  status       NoticeStatus @default(PAST_DUE)
+  customStatus String?
+  amount       Float
+  months       String?
+  createdAt    DateTime     @default(now())
+
+  // Relations
+  notice TenantNotice @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+
+  @@index([noticeId])
+}
+
+// ==========================================
+// Enums
+// ==========================================
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  STAFF
+  TENANT
+  TREASURY
+  PURCHASER
+  ACCTG
+  VIEWER
+  OWNER
+  STOCKROOM
+  MAINTENANCE
+}
+
+enum PropertyType {
+  RESIDENTIAL
+  COMMERCIAL
+  MIXED
+}
+
+enum UnitStatus {
+  VACANT
+  OCCUPIED
+  MAINTENANCE
+  RESERVED
+}
+
+enum TenantStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+enum LeaseStatus {
+  ACTIVE
+  PENDING
+  TERMINATED
+  EXPIRED
+}
+
+enum MaintenanceCategory {
+  PLUMBING
+  ELECTRICAL
+  HVAC
+  APPLIANCE
+  STRUCTURAL
+  OTHER
+}
+
+enum Priority {
+  EMERGENCY
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum MaintenanceStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentType {
+  RENT
+  SECURITY_DEPOSIT
+  FEE
+  UTILITY
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  BANK_TRANSFER
+  CHECK
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum DocumentType {
+  LEASE
+  CONTRACT
+  INVOICE
+  MAINTENANCE
+  OTHER
+}
+
+enum UtilityType {
+  WATER
+  ELECTRICITY
+  OTHERS
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+  ON_HOLD
+}
+
+enum ProjectRole {
+  OWNER
+  ADMIN
+  PURCHASER
+  ACCTG
+  TREASURY
+  STOCKROOM
+  VIEWER
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum ActivityType {
+  CREATED
+  UPDATED
+  COMMENTED
+  ATTACHMENT_ADDED
+  STATUS_CHANGED
+  ASSIGNED
+  UNASSIGNED
+  MOVED
+  LABEL_ADDED
+  LABEL_REMOVED
+  DUE_DATE_CHANGED
+}
+
+enum EntityType {
+  USER
+  PROPERTY
+  UNIT
+  LEASE
+  TENANT
+  MAINTENANCE_REQUEST
+  PAYMENT
+  DOCUMENT
+  UTILITY_BILL
+  PROPERTY_TAX
+  UNIT_TAX
+  PROJECT
+  BOARD
+  TASK
+  COMMENT
+  MATERIAL_REQUEST
+  BUSINESS_UNIT
+  DEPARTMENT
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  PASSWORD_CHANGE
+  EMAIL_CHANGE
+  PERMISSION_CHANGE
+  STATUS_CHANGE
+  ASSIGNMENT
+  PAYMENT_PROCESSED
+  DOCUMENT_UPLOAD
+}
+
+enum NotificationType {
+  SYSTEM
+  MAINTENANCE
+  LEASE
+  PAYMENT
+  DOCUMENT
+  SECURITY
+  UTILITY
+  TAX
+  PROPERTY
+  UNIT
+  TENANT
+  MATERIAL_REQUEST
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TitleMovementStatus {
+  REQUESTED
+  RELEASED
+  RETURNED
+  IN_TRANSIT
+  LOST
+}
+
+enum PDCStatus {
+  Open
+  Deposited
+  RETURNED
+  Bounced
+  Cancelled
+}
+
+enum FloorType {
+  GROUND_FLOOR
+  MEZZANINE
+  SECOND_FLOOR
+  THIRD_FLOOR
+  ROOF_TOP
+}
+
+enum NoticeType {
+  FIRST_NOTICE
+  SECOND_NOTICE
+  FINAL_NOTICE
+}
+
+enum NoticeStatus {
+  PAST_DUE
+  OVERDUE
+  CRITICAL
+  PENDING
+  UNPAID
+  CUSTOM
+}
+
+// ==========================================
+// MRS Enums
+// ==========================================
+
+enum ApproverType {
+  RECOMMENDING
+  FINAL
+}
+
+enum RequestType {
+  ITEM
+  SERVICE
+}
+
+enum RequestStatus {
+  DRAFT
+  FOR_REC_APPROVAL
+  REC_APPROVED
+  FOR_FINAL_APPROVAL
+  FINAL_APPROVED
+  FOR_POSTING
+  POSTED
+  RECEIVED
+  TRANSMITTED
+  CANCELLED
+  DISAPPROVED
+  FOR_EDIT
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  DISAPPROVED
+}
