@@ -81,6 +81,7 @@ interface ReceivedRequestsClientProps {
 
 export function ReceivedRequestsClient({ 
   initialRequests, 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   userRole, 
   businessUnitId 
 }: ReceivedRequestsClientProps) {

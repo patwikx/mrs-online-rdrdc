@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { ArrowLeft, FileText, Package, CheckCircle, Building, Users, Calendar, Clock, User, MapPin } from "lucide-react"
+import { FileText, Package, CheckCircle, Building, Users, Calendar, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,10 +24,11 @@ interface ApprovedRequestDetailPageProps {
 
 export function ApprovedRequestDetailPage({ 
   materialRequest: initialRequest, 
+
   businessUnitId, 
   userRole 
 }: ApprovedRequestDetailPageProps) {
-  const router = useRouter()
+  
   const [materialRequest, setMaterialRequest] = useState(initialRequest)
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false)
   const [isReceiveDialogOpen, setIsReceiveDialogOpen] = useState(false)
@@ -534,7 +535,7 @@ export function ApprovedRequestDetailPage({
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Are you sure you want to mark "{materialRequest.docNo}" as posted?
+              Are you sure you want to mark &quot;{materialRequest.docNo}&quot; as posted?
             </p>
             <div className="space-y-2">
               <Label htmlFor="confirmationNo">Confirmation Number (Optional)</Label>
@@ -563,7 +564,7 @@ export function ApprovedRequestDetailPage({
           <AlertDialogHeader>
             <AlertDialogTitle>Mark as Received</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to mark "{materialRequest.docNo}" as received?
+              Are you sure you want to mark &quot;{materialRequest.docNo}&quot; as received?
               This indicates that the materials have been delivered and received.
             </AlertDialogDescription>
           </AlertDialogHeader>

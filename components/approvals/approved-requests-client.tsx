@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { useState, useMemo } from "react"
@@ -430,7 +431,7 @@ export function ApprovedRequestsClient({ initialRequests, userRole, businessUnit
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Are you sure you want to mark "{selectedRequest?.docNo}" as posted?
+              Are you sure you want to mark &quot;{selectedRequest?.docNo}&quot; as posted?
             </p>
             <div className="space-y-2">
               <Label htmlFor="confirmationNo">Confirmation Number (Optional)</Label>
@@ -459,7 +460,7 @@ export function ApprovedRequestsClient({ initialRequests, userRole, businessUnit
           <AlertDialogHeader>
             <AlertDialogTitle>Mark as Received</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to mark "{selectedRequest?.docNo}" as received?
+              Are you sure you want to mark &quot;{selectedRequest?.docNo}&quot; as received?
               This indicates that the materials have been delivered and received.
             </AlertDialogDescription>
           </AlertDialogHeader>

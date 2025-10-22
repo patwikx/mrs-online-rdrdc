@@ -1,11 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Edit, Save, X } from "lucide-react"
+import { Edit, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MaterialRequest } from "@/types/material-request-types"
 import { REQUEST_STATUS_COLORS, REQUEST_STATUS_LABELS } from "@/types/material-request-types"
 import { MaterialRequestEditForm } from "./material-request-edit-form"

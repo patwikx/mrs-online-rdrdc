@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { z } from "zod"
 import bcrypt from "bcryptjs"
+import { UserRole } from "@prisma/client"
 
 // Validation schemas
 const UpdateProfileSchema = z.object({
@@ -54,25 +55,28 @@ export interface ActionResult {
   data?: unknown
 }
 
+interface Department {
+  id: string
+  name: string
+  code: string
+  businessUnit: {
+    id: string
+    name: string
+    code: string
+  }
+}
+
 export interface UserProfile {
   id: string
   firstName: string
   lastName: string
   email: string
   contactNo: string | null
-  role: string
+  role: UserRole
+  mrsDepartmentId: string | null
   createdAt: Date
   updatedAt: Date
-  mrsUserDepartment: {
-    id: string
-    name: string
-    code: string
-    businessUnit: {
-      id: string
-      name: string
-      code: string
-    }
-  } | null
+  mrsUserDepartment: Department | null
 }
 
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
@@ -86,6 +90,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
         email: true,
         contactNo: true,
         role: true,
+        mrsDepartmentId: true,
         createdAt: true,
         updatedAt: true,
         mrsUserDepartment: {
@@ -527,5 +532,43 @@ export async function deleteUser(userId: string): Promise<ActionResult> {
       success: false,
       message: "Failed to delete user"
     }
+  }
+}
+
+export async function getUserById(userId: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        contactNo: true,
+        role: true,
+        mrsDepartmentId: true,
+        createdAt: true,
+        updatedAt: true,
+        mrsUserDepartment: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            businessUnit: {
+              select: {
+                id: true,
+                name: true,
+                code: true,
+              }
+            }
+          }
+        }
+      }
+    })
+
+    return user
+  } catch (error) {
+    console.error("Error fetching user:", error)
+    return null
   }
 }

@@ -110,7 +110,7 @@ export function ApproversClient({ initialDepartments, users }: ApproversClientPr
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Department Approvers</h1>
           <p className="text-muted-foreground">
-            Manage approvers for each department's material requests
+            Manage approvers for each department&apos;s material requests
           </p>
         </div>
         <AssignApproverDialog 
@@ -263,7 +263,7 @@ export function ApproversClient({ initialDepartments, users }: ApproversClientPr
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Approver</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove "{selectedApprover?.name}" as an approver?
+              Are you sure you want to remove &quot;{selectedApprover?.name}&quot; as an approver?
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -291,7 +291,7 @@ export function ApproversClient({ initialDepartments, users }: ApproversClientPr
               {departments.find(d => d.approvers.find(a => a.id === selectedApprover?.id))?.approvers.find(a => a.id === selectedApprover?.id)?.isActive ? 'Deactivate' : 'Activate'} Approver
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to {departments.find(d => d.approvers.find(a => a.id === selectedApprover?.id))?.approvers.find(a => a.id === selectedApprover?.id)?.isActive ? 'deactivate' : 'activate'} "{selectedApprover?.name}" as an approver?
+              Are you sure you want to {departments.find(d => d.approvers.find(a => a.id === selectedApprover?.id))?.approvers.find(a => a.id === selectedApprover?.id)?.isActive ? 'deactivate' : 'activate'} &quot;{selectedApprover?.name}&quot; as an approver?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -99,8 +99,8 @@ export default async function ApprovalsPage({ params }: ApprovalsPageProps) {
         <CardContent>
           <div className="text-sm text-muted-foreground space-y-2">
             <p>• <strong>Pending Approvals:</strong> Review requests waiting for your approval</p>
-            <p>• <strong>Approved Requests:</strong> Track requests you've approved</p>
-            <p>• <strong>Disapproved Requests:</strong> Review requests you've rejected with reasons</p>
+            <p>• <strong>Approved Requests:</strong> Track requests you&apos;ve approved</p>
+            <p>• <strong>Disapproved Requests:</strong> Review requests you&apos;ve rejected with reasons</p>
             <p>• <strong>All Approvals:</strong> Complete history of your approval activities</p>
           </div>
         </CardContent>

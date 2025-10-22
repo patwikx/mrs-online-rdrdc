@@ -176,7 +176,7 @@ export function BusinessUnitDialog({
                     />
                   </FormControl>
                   <FormDescription>
-                    Optional description to help users understand the business unit's role
+                    Optional description to help users understand the business unit&apos;s role
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

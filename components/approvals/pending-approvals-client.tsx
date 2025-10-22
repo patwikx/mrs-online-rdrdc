@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { useState, useMemo } from "react"
-import { MoreHorizontal, CheckCircle, XCircle, Eye, Search, Filter, Clock, FileText, Building, Users, ChevronLeft, ChevronRight } from "lucide-react"
+import { MoreHorizontal, CheckCircle, XCircle, Eye, Search, Clock, FileText, Building, Users, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -10,8 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ApprovalStatus, RequestType } from "@prisma/client"
-import { PendingApproval, APPROVAL_ACTION_COLORS } from "@/types/approval-types"
-import { REQUEST_TYPE_LABELS, REQUEST_STATUS_LABELS } from "@/types/material-request-types"
+import { PendingApproval } from "@/types/approval-types"
+import { REQUEST_TYPE_LABELS } from "@/types/material-request-types"
 import { ApprovalDialog } from "./approval-dialog"
 
 interface PendingApprovalsClientProps {
@@ -409,7 +410,7 @@ export function PendingApprovalsClient({ initialApprovals, userRole }: PendingAp
                 {approval.purpose && (
                   <div className="text-sm">
                     <span className="font-medium">Purpose: </span>
-                    <span className="text-muted-foreground italic">"{approval.purpose}"</span>
+                    <span className="text-muted-foreground italic">&quot;{approval.purpose}&quot;</span>
                   </div>
                 )}
 

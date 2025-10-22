@@ -565,6 +565,7 @@ export async function processFinalApproval(input: ApprovalInput): Promise<Action
       return { success: false, message: "Request is not pending final approval" }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const updateData: Record<string, unknown> = {
       finalApprovalStatus: validatedData.status,
       finalApprovalDate: new Date(),

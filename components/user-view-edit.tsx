@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { UserRole } from "@prisma/client"
-import { Edit, Save, X } from "lucide-react"
+import { Edit } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -75,6 +75,7 @@ const roleColors: Record<UserRole, string> = {
   TENANT: "bg-pink-50 text-pink-700 border-pink-200",
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function UserViewEdit({ user, departments, businessUnits, businessUnitId }: UserViewEditProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
 

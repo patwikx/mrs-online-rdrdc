@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { MoreHorizontal, Users, Trash2, Eye, EyeOff, Building, UserCheck, FileText, Search, Plus, Filter, ChevronLeft, ChevronRight } from "lucide-react"
+import { MoreHorizontal, Users, Trash2, Eye, EyeOff, UserCheck, FileText, Search, Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -377,7 +377,7 @@ export function DepartmentsClient({ initialDepartments, businessUnits }: Departm
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Department</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{selectedDepartment?.name}"?
+              Are you sure you want to delete &quot;{selectedDepartment?.name}&quot;?
               This action cannot be undone and will fail if there are existing users, requests, or approvers.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -405,7 +405,7 @@ export function DepartmentsClient({ initialDepartments, businessUnits }: Departm
               {departments.find(dept => dept.id === selectedDepartment?.id)?.isActive ? 'Deactivate' : 'Activate'} Department
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to {departments.find(dept => dept.id === selectedDepartment?.id)?.isActive ? 'deactivate' : 'activate'} "{selectedDepartment?.name}"?
+              Are you sure you want to {departments.find(dept => dept.id === selectedDepartment?.id)?.isActive ? 'deactivate' : 'activate'} &quot;{selectedDepartment?.name}&quot;?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

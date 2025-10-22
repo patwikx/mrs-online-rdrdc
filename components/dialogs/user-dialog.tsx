@@ -224,7 +224,7 @@ export function UserDialog({ open, onOpenChange, user, departments, businessUnit
                         <Input placeholder="John" {...field} />
                       </FormControl>
                       <FormDescription className="text-xs">
-                        User's first name
+                        User&apos;s first name
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -243,7 +243,7 @@ export function UserDialog({ open, onOpenChange, user, departments, businessUnit
                         <Input placeholder="Doe" {...field} />
                       </FormControl>
                       <FormDescription className="text-xs">
-                        User's last name
+                        User&apos;s last name
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

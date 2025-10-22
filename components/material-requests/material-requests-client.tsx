@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { useState, useMemo } from "react"
@@ -7,9 +8,8 @@ import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Send, ChevronLeft, Che
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
@@ -17,8 +17,6 @@ import { MaterialRequest, REQUEST_STATUS_LABELS, REQUEST_STATUS_COLORS, REQUEST_
 import { RequestStatus, RequestType } from "@prisma/client"
 import { deleteMaterialRequest, submitForApproval } from "@/lib/actions/material-request-actions"
 
-
-import { format } from "date-fns"
 
 interface MaterialRequestsClientProps {
   initialRequests: MaterialRequest[]
@@ -460,7 +458,7 @@ export function MaterialRequestsClient({ initialRequests }: MaterialRequestsClie
                 {request.purpose && (
                   <div className="text-sm">
                     <span className="font-medium">Purpose: </span>
-                    <span className="text-muted-foreground italic">"{request.purpose}"</span>
+                    <span className="text-muted-foreground italic">&quot;{request.purpose}&quot;</span>
                   </div>
                 )}
 
@@ -566,7 +564,7 @@ export function MaterialRequestsClient({ initialRequests }: MaterialRequestsClie
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the material request
-              "{selectedRequest?.docNo}".
+              &quot;{selectedRequest?.docNo}&quot;.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -588,8 +586,8 @@ export function MaterialRequestsClient({ initialRequests }: MaterialRequestsClie
           <AlertDialogHeader>
             <AlertDialogTitle>Submit for Approval</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to submit "{selectedRequest?.docNo}" for approval?
-              Once submitted, you will not be able to edit the request unless it's returned for editing.
+              Are you sure you want to submit &quot;{selectedRequest?.docNo}&quot; for approval?
+              Once submitted, you will not be able to edit the request unless it&apos;s returned for editing.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

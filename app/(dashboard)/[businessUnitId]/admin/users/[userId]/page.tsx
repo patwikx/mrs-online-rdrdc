@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import { getUserById, getDepartments, getBusinessUnits } from "@/lib/actions/user-actions"
 import { UserViewEdit } from "@/components/user-view-edit"
-import { UserRole } from "@prisma/client"
+
 
 interface ViewUserPageProps {
   params: Promise<{ 

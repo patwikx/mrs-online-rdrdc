@@ -324,7 +324,7 @@ export function BusinessUnitsClient({ initialBusinessUnits }: BusinessUnitsClien
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Business Unit</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{selectedBusinessUnit?.name}"?
+              Are you sure you want to delete &quot;{selectedBusinessUnit?.name}&quot;?
               This action cannot be undone and will fail if there are existing departments or requests.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -352,7 +352,7 @@ export function BusinessUnitsClient({ initialBusinessUnits }: BusinessUnitsClien
               {businessUnits.find(bu => bu.id === selectedBusinessUnit?.id)?.isActive ? 'Deactivate' : 'Activate'} Business Unit
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to {businessUnits.find(bu => bu.id === selectedBusinessUnit?.id)?.isActive ? 'deactivate' : 'activate'} "{selectedBusinessUnit?.name}"?
+              Are you sure you want to {businessUnits.find(bu => bu.id === selectedBusinessUnit?.id)?.isActive ? 'deactivate' : 'activate'} &quot;{selectedBusinessUnit?.name}&quot;?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

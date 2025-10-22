@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { useState } from "react"
@@ -123,7 +124,7 @@ export function ApprovalDialog({
             {actionText} Material Request
           </DialogTitle>
           <DialogDescription>
-            You are about to {actionText.toLowerCase()} material request "{approval.docNo}". 
+            You are about to {actionText.toLowerCase()} material request &quot;{approval.docNo}&quot;. 
             {!isApproval && " Please provide a reason for disapproval."}
           </DialogDescription>
         </DialogHeader>

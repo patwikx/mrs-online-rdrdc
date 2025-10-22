@@ -214,7 +214,7 @@ export function DepartmentDialog({
                     />
                   </FormControl>
                   <FormDescription>
-                    Optional description to help users understand the department's role
+                    Optional description to help users understand the department&apos;s role
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

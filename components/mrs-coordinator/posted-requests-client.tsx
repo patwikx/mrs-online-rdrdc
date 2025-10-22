@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Search, Package, Eye, CheckCircle } from "lucide-react"
 import { format } from "date-fns"
-import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { MarkAsDoneDialog } from "./mark-as-done-dialog"
@@ -86,6 +85,7 @@ export function PostedRequestsClient({
 }: PostedRequestsClientProps) {
   const [requests, setRequests] = useState<MaterialRequest[]>(initialRequests)
   const [searchTerm, setSearchTerm] = useState("")
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<MaterialRequest | null>(null)
   const [isMarkAsDoneDialogOpen, setIsMarkAsDoneDialogOpen] = useState(false)

@@ -3,14 +3,10 @@ import { redirect } from "next/navigation"
 
 interface AdminLayoutProps {
   children: React.ReactNode
-  params: {
-    businessUnitId: string
-  }
 }
 
 export default async function AdminLayout({ 
   children, 
-  params 
 }: AdminLayoutProps) {
   const session = await auth()
   

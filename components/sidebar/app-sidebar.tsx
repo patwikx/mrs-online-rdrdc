@@ -7,7 +7,6 @@ import {
   Settings, 
   BarChart3, 
   Shield,
-  ClipboardList,
   CheckSquare,
   ShoppingCart
 } from "lucide-react"

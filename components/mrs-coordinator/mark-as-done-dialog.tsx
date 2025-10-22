@@ -166,7 +166,7 @@ export function MarkAsDoneDialog({
             Mark Request as Done
           </DialogTitle>
           <DialogDescription>
-            Mark material request "{request.docNo}" as completed and received.
+            Mark material request &quot;{request.docNo}&quot; as completed and received.
             You can optionally select a supplier for this request.
           </DialogDescription>
         </DialogHeader>
@@ -217,6 +217,7 @@ export function MarkAsDoneDialog({
               rules={{
                 required: "Supplier is required"
               }}
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">

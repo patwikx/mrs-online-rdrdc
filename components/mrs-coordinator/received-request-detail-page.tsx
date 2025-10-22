@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Package, Calendar, User, Building, FileText, DollarSign, CheckCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Calendar, User, Building, FileText, DollarSign, CheckCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -78,7 +78,6 @@ interface ReceivedRequestDetailPageProps {
 }
 
 export function ReceivedRequestDetailPage({ request, userRole, businessUnitId }: ReceivedRequestDetailPageProps) {
-  const router = useRouter()
 
   const formatCurrency = (amount: number) => {
     return `₱${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
@@ -224,7 +223,7 @@ export function ReceivedRequestDetailPage({ request, userRole, businessUnitId }:
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Date Done</label>
-              <p className="font-medium text-green-600 font-semibold">{formatDate(request.dateReceived)}</p>
+              <p className="text-green-600 font-semibold">{formatDate(request.dateReceived)}</p>
             </div>
           </CardContent>
         </Card>

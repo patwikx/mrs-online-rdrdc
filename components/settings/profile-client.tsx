@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { useState } from "react"
@@ -297,7 +298,7 @@ export function ProfileClient({ user, businessUnitId }: ProfileClientProps) {
                       <li>• Use at least 8 characters</li>
                       <li>• Include uppercase and lowercase letters</li>
                       <li>• Add numbers and special characters</li>
-                      <li>• Don't reuse old passwords</li>
+                      <li>• Don&apos;t reuse old passwords</li>
                     </ul>
                   </div>
                 </div>

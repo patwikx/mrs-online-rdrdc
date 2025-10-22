@@ -2,12 +2,11 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, CheckCircle, Package, Calendar, User, Building, FileText, DollarSign } from "lucide-react"
+import { CheckCircle, Package, Calendar, User, FileText, DollarSign } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { toast } from "sonner"
 import { format } from "date-fns"
 import { MarkAsDoneDialog } from "./mark-as-done-dialog"
 
@@ -80,6 +79,7 @@ interface PostedRequestDetailPageProps {
 export function PostedRequestDetailPage({ request, userRole, businessUnitId }: PostedRequestDetailPageProps) {
   const router = useRouter()
   const [isDoneDialogOpen, setIsDoneDialogOpen] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(false)
 
   const handleMarkAsDoneSuccess = () => {

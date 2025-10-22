@@ -127,7 +127,7 @@ export function MaterialRequestCreateForm() {
       form.setValue("docNo", initialDocNo)
     }
     loadData()
-  }, [])
+  }, [form])
 
   const filteredDepartments = departments.filter(
     dept => dept.businessUnitId === watchedBusinessUnitId
@@ -990,7 +990,7 @@ export function MaterialRequestCreateForm() {
                       <Plus className="h-6 w-6" />
                     </div>
                     <p className="font-medium">No items added yet</p>
-                    <p className="text-sm">Click "Add Item" to get started</p>
+                    <p className="text-sm">Click &quot;Add Item&quot; to get started</p>
                   </div>
                 </div>
               )}

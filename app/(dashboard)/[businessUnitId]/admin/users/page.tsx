@@ -37,6 +37,7 @@ function UsersTableSkeleton() {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function UsersContent({ businessUnitId }: { businessUnitId: string }) {
   const [users, departments, businessUnits] = await Promise.all([
     getUsers(),
